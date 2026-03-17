@@ -1,0 +1,562 @@
+// PRAM Platform - Schema Prisma
+// Platformă de management al verificărilor prize de pământ și protecție împotriva electrocutării
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// AUTENTIFICARE ȘI UTILIZATORI
+// ============================================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  TEHNICIAN
+  BACK_OFFICE
+  CLIENT
+}
+
+enum UserStatus {
+  ACTIV
+  INACTIV
+  SUSPENDAT
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  emailVerified DateTime?
+  password      String?
+  nume          String
+  prenume       String
+  telefon       String?
+  avatar        String?
+  role          UserRole   @default(TEHNICIAN)
+  status        UserStatus @default(ACTIV)
+
+  // Relații NextAuth
+  accounts Account[]
+  sessions Session[]
+
+  // Relații business
+  clientId          String?
+  client            Client?          @relation("ClientUtilizator", fields: [clientId], references: [id])
+  verificariAlocate Verificare[]     @relation("TehnicianVerificare")
+  verificariCreate  Verificare[]     @relation("CreatorVerificare")
+  documente         Document[]
+  notificari        Notificare[]
+  activitati        LogActivitate[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================
+// CLIENȚI
+// ============================================================
+
+enum TipClient {
+  PERSOANA_JURIDICA
+  PERSOANA_FIZICA
+  INSTITUTIE_PUBLICA
+}
+
+enum StatusClient {
+  ACTIV
+  INACTIV
+  PROSPECT
+}
+
+model Client {
+  id            String       @id @default(cuid())
+  cod           String       @unique // ex: CLT-2024-0001
+  denumire      String
+  tip           TipClient    @default(PERSOANA_JURIDICA)
+  cui           String?      @unique // CUI/CNP
+  nrRegCom      String?      // Nr. Reg. Com.
+  adresa        String?
+  oras          String?
+  judet         String?
+  codPostal     String?
+  telefon       String?
+  email         String?
+  website       String?
+  persoanaContact String?
+  telefonContact  String?
+  emailContact    String?
+  status        StatusClient @default(ACTIV)
+  observatii    String?      @db.Text
+
+  // Relații
+  locatii    Locatie[]
+  utilizatori User[]       @relation("ClientUtilizator")
+  contracte  Contract[]
+  documente  Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clienti")
+}
+
+// ============================================================
+// LOCAȚII
+// ============================================================
+
+enum TipLocatie {
+  SEDIU_PRINCIPAL
+  PUNCT_DE_LUCRU
+  DEPOZIT
+  HALA_PRODUCTIE
+  BIROU
+  ALTELE
+}
+
+enum StatusLocatie {
+  ACTIVA
+  INACTIVA
+  IN_CONSTRUCTIE
+}
+
+model Locatie {
+  id          String        @id @default(cuid())
+  cod         String        @unique // ex: LOC-2024-0001
+  denumire    String
+  tip         TipLocatie    @default(PUNCT_DE_LUCRU)
+  adresa      String
+  oras        String
+  judet       String
+  codPostal   String?
+  telefon     String?
+  email       String?
+  persoanaContact String?
+  telefonContact  String?
+  status      StatusLocatie @default(ACTIVA)
+  suprafata   Float?        // m²
+  descriere   String?       @db.Text
+  coordGPS    String?       // "lat,lng"
+
+  // Relații
+  clientId   String
+  client     Client       @relation(fields: [clientId], references: [id])
+  verificari Verificare[]
+  aparate    AparatMasura[] @relation("AparatLocatie")
+  remindere  Reminder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("locatii")
+}
+
+// ============================================================
+// APARATE DE MĂSURĂ
+// ============================================================
+
+enum StatusAparatMasura {
+  ACTIV
+  IN_SERVICE
+  DEFECT
+  CASSAT
+}
+
+model AparatMasura {
+  id              String             @id @default(cuid())
+  cod             String             @unique // ex: APM-2024-0001
+  denumire        String
+  producator      String
+  model           String
+  serieNumar      String
+  anFabricatie    Int?
+  dataAchizitie   DateTime?
+  dataUltimaEtalonare DateTime?
+  dataUrmatoareEtalonare DateTime?
+  certificatEtalonare String?        // nr. certificat
+  status          StatusAparatMasura @default(ACTIV)
+  observatii      String?            @db.Text
+
+  // Locație curentă (opțional - poate fi la sediul firmei)
+  locatieCurentaId String?
+  locatieCurenta   Locatie? @relation("AparatLocatie", fields: [locatieCurentaId], references: [id])
+
+  // Relații
+  verificari VerificareAparatMasura[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("aparate_masura")
+}
+
+// ============================================================
+// VERIFICĂRI PRAM
+// ============================================================
+
+enum TipVerificare {
+  VERIFICARE_INITIALA
+  VERIFICARE_PERIODICA
+  VERIFICARE_DUPA_REPARATIE
+  VERIFICARE_LA_CERERE
+  RE_VERIFICARE
+}
+
+enum StatusVerificare {
+  PROGRAMATA
+  IN_DESFASURARE
+  FINALIZATA
+  ANULATA
+  AMANATA
+}
+
+enum RezultatVerificare {
+  ADMIS
+  RESPINS
+  ADMIS_CU_REZERVE
+  IN_ASTEPTARE
+}
+
+model Verificare {
+  id              String              @id @default(cuid())
+  numar           String              @unique // ex: VRF-2024-0001
+  tip             TipVerificare       @default(VERIFICARE_PERIODICA)
+  status          StatusVerificare    @default(PROGRAMATA)
+  rezultat        RezultatVerificare?
+
+  // Programare
+  dataProgramata  DateTime
+  dataStartEfectiva DateTime?
+  dataFinalizare  DateTime?
+  durataPlanificata Int?              // minute
+  durataEfectiva  Int?               // minute
+
+  // Locație
+  locatieId       String
+  locatie         Locatie            @relation(fields: [locatieId], references: [id])
+
+  // Personal
+  tehnicianId     String?
+  tehnician       User?              @relation("TehnicianVerificare", fields: [tehnicianId], references: [id])
+  creatDe         String
+  creator         User               @relation("CreatorVerificare", fields: [creatDe], references: [id])
+
+  // Detalii tehnice
+  observatiiProgramare String?       @db.Text
+  observatiiTeren      String?       @db.Text
+  concluzii            String?       @db.Text
+  recomandari          String?       @db.Text
+
+  // Documente și semnătură
+  semnaturaClient String?           // base64 image sau URL
+  semnaturaTehnician String?        // base64 image sau URL
+
+  // Relații
+  masuratori         Masuratore[]
+  continuitateAnexe  ContinuitateAnexa[]
+  documente          Document[]
+  aparate            VerificareAparatMasura[]
+  poze               PozaVerificare[]
+  remindere          Reminder[]
+  notificari         Notificare[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("verificari")
+}
+
+// Continuități nul de protecție (Anexa B1)
+model ContinuitateAnexa {
+  id           String     @id @default(cuid())
+  verificareId String
+  verificare   Verificare @relation(fields: [verificareId], references: [id], onDelete: Cascade)
+
+  denumire     String         // Denumire spațiu / Echipament
+  nrPrize230V  Int?           // Număr prize 230V
+  nrPrize400V  Int?           // Număr prize 400V
+  nrTabUtilaj  String?        // NR. TAB / Utilaj
+  corespunde   Boolean        @default(true) // DA/NU
+
+  createdAt DateTime @default(now())
+
+  @@map("continuitate_anexe")
+}
+
+// Aparate folosite la o verificare
+model VerificareAparatMasura {
+  id             String       @id @default(cuid())
+  verificareId   String
+  verificare     Verificare   @relation(fields: [verificareId], references: [id], onDelete: Cascade)
+  aparatId       String
+  aparat         AparatMasura @relation(fields: [aparatId], references: [id])
+  observatii     String?
+
+  @@unique([verificareId, aparatId])
+  @@map("verificare_aparate")
+}
+
+// ============================================================
+// MĂSURĂTORI
+// ============================================================
+
+enum TipMasuratore {
+  REZISTENTA_PRIZE_PAMANT        // Ω
+  REZISTENTA_IZOLATIE            // MΩ
+  CONTINUITATE_CONDUCTOR_PROTECTIE
+  CURENT_FUGA                    // mA
+  TENSIUNE_ATINGERE              // V
+  TENSIUNE_PAS                   // V
+  IMPEDANTA_BUCLA_DEFECT         // Ω
+  CURENT_SCURTCIRCUIT            // kA
+  TIMP_ACTIONARE_DDR              // ms
+  REZISTENTA_CONTACT             // mΩ
+  ALTELE
+}
+
+model Masuratore {
+  id            String         @id @default(cuid())
+  verificareId  String
+  verificare    Verificare     @relation(fields: [verificareId], references: [id], onDelete: Cascade)
+
+  tip           TipMasuratore
+  denumire      String         // ex: "Priza de pământ tablou principal"
+  localizare    String?        // ex: "Tablou electric parter"
+  valoareMasurata Float
+  unitateMasura String         // ex: "Ω", "MΩ", "mA", "V"
+  valoareAdmisa Float?         // valoarea limită admisă
+  conformitate  Boolean?       // true = conform, false = neconform
+  observatii    String?
+
+  createdAt DateTime @default(now())
+
+  @@map("masuratori")
+}
+
+// ============================================================
+// POZE VERIFICARE
+// ============================================================
+
+model PozaVerificare {
+  id           String     @id @default(cuid())
+  verificareId String
+  verificare   Verificare @relation(fields: [verificareId], references: [id], onDelete: Cascade)
+  url          String
+  numeFisier   String
+  descriere    String?
+  pozitie      Int        @default(0) // pentru ordonare
+
+  createdAt DateTime @default(now())
+
+  @@map("poze_verificare")
+}
+
+// ============================================================
+// DOCUMENTE
+// ============================================================
+
+enum TipDocument {
+  BULETIN_VERIFICARE
+  RAPORT_MASURATORI
+  CERTIFICAT_CONFORMITATE
+  PROCES_VERBAL
+  CONTRACT
+  OFERTA
+  FACTURA
+  ALTELE
+}
+
+enum StatusDocument {
+  DRAFT
+  FINAL
+  SEMNAT
+  ARHIVAT
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  numar        String         @unique // ex: DOC-2024-0001
+  denumire     String
+  tip          TipDocument
+  status       StatusDocument @default(DRAFT)
+  url          String?        // URL fișier
+  numeFisier   String?
+  dimensiune   Int?           // bytes
+  observatii   String?
+
+  // Relații opționale
+  verificareId String?
+  verificare   Verificare?    @relation(fields: [verificareId], references: [id])
+  clientId     String?
+  client       Client?        @relation(fields: [clientId], references: [id])
+  creatDe      String
+  creator      User           @relation(fields: [creatDe], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("documente")
+}
+
+// ============================================================
+// CONTRACTE
+// ============================================================
+
+enum StatusContract {
+  ACTIV
+  EXPIRAT
+  SUSPENDAT
+  REZILIAT
+}
+
+model Contract {
+  id            String         @id @default(cuid())
+  numar         String         @unique
+  clientId      String
+  client        Client         @relation(fields: [clientId], references: [id])
+  dataInceput   DateTime
+  dataExpirare  DateTime
+  valoare       Float?
+  moneda        String         @default("RON")
+  status        StatusContract @default(ACTIV)
+  observatii    String?        @db.Text
+  url           String?        // URL contract semnat
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contracte")
+}
+
+// ============================================================
+// REMINDERE ȘI ALERTE
+// ============================================================
+
+enum TipReminder {
+  VERIFICARE_PERIODICA     // reminder pentru verificarea periodică
+  ETALONARE_APARAT         // reminder etalonare aparat de măsură
+  EXPIRARE_CONTRACT        // reminder expirare contract
+  ALTELE
+}
+
+enum StatusReminder {
+  ACTIV
+  TRIMIS
+  DEZACTIVAT
+}
+
+model Reminder {
+  id            String         @id @default(cuid())
+  tip           TipReminder
+  status        StatusReminder @default(ACTIV)
+  titlu         String
+  mesaj         String?        @db.Text
+  dataTrigger   DateTime       // când să fie trimis/afișat
+  dataTrimis    DateTime?
+
+  // Relații opționale
+  locatieId     String?
+  locatie       Locatie?       @relation(fields: [locatieId], references: [id])
+  verificareId  String?
+  verificare    Verificare?    @relation(fields: [verificareId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("remindere")
+}
+
+// ============================================================
+// NOTIFICĂRI
+// ============================================================
+
+enum TipNotificare {
+  VERIFICARE_PROGRAMATA
+  VERIFICARE_FINALIZATA
+  DOCUMENT_GENERAT
+  REMINDER
+  SISTEM
+}
+
+model Notificare {
+  id       String         @id @default(cuid())
+  userId   String
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tip      TipNotificare
+  titlu    String
+  mesaj    String
+  citita   Boolean        @default(false)
+  url      String?        // link redirect
+
+  verificareId String?
+  verificare   Verificare? @relation(fields: [verificareId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("notificari")
+}
+
+// ============================================================
+// LOG ACTIVITATE (Audit Trail)
+// ============================================================
+
+model LogActivitate {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  actiune    String   // ex: "CREATE_VERIFICARE", "UPDATE_CLIENT"
+  entitate   String   // ex: "Verificare", "Client"
+  entitateId String
+  detalii    String?  @db.Text // JSON cu modificările
+  ipAddress  String?
+  userAgent  String?
+
+  createdAt DateTime @default(now())
+
+  @@map("log_activitate")
+}

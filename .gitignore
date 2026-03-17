@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Next.js build
+.next/
+out/
+
+# Environment variables (SECRETELE NU SE URCĂ PE GITHUB)
+.env
+.env.local
+.env.production
+
+# Prisma generated
+prisma/generated/
+
+# Uploads locale
+public/uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude local settings
+.claude/settings.local.json
