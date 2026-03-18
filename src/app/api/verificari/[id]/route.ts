@@ -5,7 +5,7 @@ import prisma from '@/lib/db'
 import { verificareUpdateSchema } from '@/lib/validations/verificare'
 import { hasPermission } from '@/lib/permissions'
 import { addMonths, subDays, format } from 'date-fns'
-import { sendNotificationEmails, emailHtml } from '@/lib/email'
+import { sendNotificationEmails, sendEmail, emailHtml } from '@/lib/email'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession()
@@ -210,13 +210,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       await prisma.notificare.createMany({ data: notificariReminder })
     }
 
-    // Trimite email reminder
+    // Trimite email reminder către admini + tehnician (prin userId)
     const mesajReminderEmail = `Verificarea periodică pentru ${verificare.locatie.client.denumire} (${verificare.locatie.denumire}) este programată pe ${format(dataNouaVerificare, 'dd.MM.yyyy')}. Număr verificare: ${numarNou}.`
-    await sendNotificationEmails(
-      Array.from(destinatariNotificari),
-      `Verificare periodică în 10 zile — ${verificare.locatie.denumire}`,
-      emailHtml(mesajReminderEmail, `/verificari/${verificareNoua.id}`)
-    )
+    const subiectReminder = `Verificare periodică în 10 zile — ${verificare.locatie.denumire}`
+    const htmlReminder = emailHtml(mesajReminderEmail, `/verificari/${verificareNoua.id}`)
+
+    await sendNotificationEmails(Array.from(destinatariNotificari), subiectReminder, htmlReminder)
+
+    // Trimite și către persoana de contact a clientului (email direct, nu user în sistem)
+    const emailContact = verificare.locatie.client.emailContact
+    if (emailContact) {
+      await sendEmail(emailContact, subiectReminder, htmlReminder)
+    }
   }
 
   return NextResponse.json(verificare)

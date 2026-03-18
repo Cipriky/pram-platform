@@ -4,7 +4,7 @@ import { getAuthSession } from '@/lib/auth'
 import { Header } from '@/components/layout/header'
 import { PageHeader } from '@/components/layout/page-header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Settings, Bell, Users, Database, Shield } from 'lucide-react'
+import { Settings, Users, Database, Shield } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Setări' }
 
@@ -41,36 +41,6 @@ export default async function SetariPage() {
               <a href="/tehnicieni" className="text-sm text-blue-600 hover:underline mt-2 block">
                 Gestionează utilizatori →
               </a>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50">
-                  <Bell className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Notificări și remindere</CardTitle>
-                  <CardDescription>Configurare alerte automate</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span>Reminder verificare periodică</span>
-                  <span className="font-medium text-green-600">30 zile înainte</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span>Reminder etalonare aparat</span>
-                  <span className="font-medium text-green-600">30 zile înainte</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span>Reminder expirare contract</span>
-                  <span className="font-medium text-green-600">60 zile înainte</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
