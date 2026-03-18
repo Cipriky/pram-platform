@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/header'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { AparatForm } from '@/components/forms/aparat-form'
+import { AparatMasuraFormValues } from '@/lib/validations/aparat'
 import { format } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Editare aparat' }
@@ -40,7 +41,7 @@ export default async function EditareAparatPage({ params }: { params: { id: stri
             dataUltimaEtalonare: aparat.dataUltimaEtalonare ? format(aparat.dataUltimaEtalonare, 'yyyy-MM-dd') : undefined,
             dataUrmatoareEtalonare: aparat.dataUrmatoareEtalonare ? format(aparat.dataUrmatoareEtalonare, 'yyyy-MM-dd') : undefined,
             certificatEtalonare: aparat.certificatEtalonare ?? undefined,
-            status: aparat.status,
+            status: aparat.status as AparatMasuraFormValues['status'],
             observatii: aparat.observatii ?? undefined,
           }}
         />
