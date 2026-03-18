@@ -73,6 +73,7 @@ export function StatusAparatBadge({ status }: StatusAparatProps) {
     IN_SERVICE: { label: 'Service', variant: 'warning' },
     DEFECT: { label: 'Defect', variant: 'destructive' },
     CASSAT: { label: 'Casat', variant: 'secondary' },
+    INACTIV: { label: 'Inactiv', variant: 'secondary' },
   }
   const cfg = config[status] ?? { label: status, variant: 'outline' }
   return <Badge variant={cfg.variant}>{cfg.label}</Badge>
