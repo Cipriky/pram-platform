@@ -15,6 +15,15 @@ export const metadata: Metadata = { title: 'Aparate de măsură' }
 export default async function AparatePage() {
   const session = await getAuthSession()
 
+  // Marchează automat ca INACTIV aparatele cu etalonarea expirată
+  await prisma.aparatMasura.updateMany({
+    where: {
+      dataUrmatoareEtalonare: { lt: new Date() },
+      status: { not: 'INACTIV' },
+    },
+    data: { status: 'INACTIV' },
+  })
+
   const aparate = await prisma.aparatMasura.findMany({
     orderBy: { createdAt: 'desc' },
   })
