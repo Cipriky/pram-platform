@@ -93,6 +93,7 @@ export function AparatForm({ defaultValues, aparatId }: AparatFormProps) {
                 <SelectItem value="IN_SERVICE">În service</SelectItem>
                 <SelectItem value="DEFECT">Defect</SelectItem>
                 <SelectItem value="CASSAT">Casat</SelectItem>
+                <SelectItem value="INACTIV">Inactiv</SelectItem>
               </SelectContent>
             </Select>
           </div>

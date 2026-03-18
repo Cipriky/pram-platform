@@ -10,7 +10,7 @@ export const aparatMasuraSchema = z.object({
   dataUltimaEtalonare: z.string().optional().nullable(),
   dataUrmatoareEtalonare: z.string().optional().nullable(),
   certificatEtalonare: z.string().optional().nullable(),
-  status: z.enum(['ACTIV', 'IN_SERVICE', 'DEFECT', 'CASSAT']).default('ACTIV'),
+  status: z.enum(['ACTIV', 'IN_SERVICE', 'DEFECT', 'CASSAT', 'INACTIV']).default('ACTIV'),
   observatii: z.string().optional().nullable(),
 })
 
