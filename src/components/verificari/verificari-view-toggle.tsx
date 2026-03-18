@@ -106,8 +106,8 @@ export function VerificariViewToggle({ verificari, tehnicieni, canCreate }: {
                       <span>{v._count.poze} poze</span>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <StatusVerificareBadge status={v.status} />
-                      {v.rezultat && <RezultatVerificareBadge rezultat={v.rezultat} />}
+                      <StatusVerificareBadge status={v.status as any} />
+                      {v.rezultat && <RezultatVerificareBadge rezultat={v.rezultat as any} />}
                     </div>
                   </Link>
                 ))}
