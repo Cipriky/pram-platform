@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Plus, Wrench, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { StatusAparatMasura } from '@prisma/client'
 import prisma from '@/lib/db'
 import { getAuthSession } from '@/lib/auth'
 import { Header } from '@/components/layout/header'
@@ -19,9 +20,9 @@ export default async function AparatePage() {
   await prisma.aparatMasura.updateMany({
     where: {
       dataUrmatoareEtalonare: { lt: new Date() },
-      status: { not: 'INACTIV' },
+      status: { not: StatusAparatMasura.INACTIV },
     },
-    data: { status: 'INACTIV' },
+    data: { status: StatusAparatMasura.INACTIV },
   })
 
   const aparate = await prisma.aparatMasura.findMany({
