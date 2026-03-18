@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { getAuthSession } from '@/lib/auth'
 import { ClientiTable } from '@/components/clienti/clienti-table'
+import { ImportClientiButton } from '@/components/clienti/import-clienti-button'
 
 export const metadata: Metadata = { title: 'Clienți' }
 
@@ -37,12 +38,15 @@ export default async function ClientiPage() {
           description={`${clienti.length} clienți înregistrați`}
         >
           {canCreate && (
-            <Link href="/clienti/nou">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Client nou
-              </Button>
-            </Link>
+            <>
+              <ImportClientiButton />
+              <Link href="/clienti/nou">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Client nou
+                </Button>
+              </Link>
+            </>
           )}
         </PageHeader>
 
