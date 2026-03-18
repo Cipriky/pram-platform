@@ -46,8 +46,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       ? '&#10003;'  // ✓
       : '&#9633;'   // □
 
-  // Aparatul principal folosit
-  const aparat = v.aparate[0]?.aparat
+  // Aparatul implicit (setat din card-ul Aparate de Măsură)
+  const aparatImplicit = await prisma.aparatMasura.findFirst({ where: { isDefault: true } })
+  const aparat = aparatImplicit ?? v.aparate[0]?.aparat
   const aparatLinie1 = aparat
     ? `${aparat.producator} TIP ${aparat.model}: SERIA - ${aparat.serieNumar}`
     : '_______________'

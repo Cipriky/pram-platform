@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusAparatBadge } from '@/components/shared/status-badge'
 import { formatDate, isExpired, isExpiringSoon } from '@/lib/utils'
+import { SetDefaultButton } from '@/components/aparate/set-default-button'
 
 export const metadata: Metadata = { title: 'Detalii aparat' }
 
@@ -40,6 +41,9 @@ export default async function AparatDetailPage({ params }: { params: { id: strin
               Înapoi
             </Button>
           </Link>
+          {canEdit && (
+            <SetDefaultButton aparatId={aparat.id} isDefault={aparat.isDefault} />
+          )}
           {canEdit && (
             <Link href={`/aparate/${aparat.id}/editeaza`}>
               <Button size="sm">

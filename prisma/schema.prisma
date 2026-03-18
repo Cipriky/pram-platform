@@ -220,6 +220,7 @@ model AparatMasura {
   dataUltimaEtalonare DateTime?
   dataUrmatoareEtalonare DateTime?
   certificatEtalonare String?        // nr. certificat
+  isDefault       Boolean            @default(false) // aparat implicit pentru buletine
   status          StatusAparatMasura @default(ACTIV)
   observatii      String?            @db.Text
 
