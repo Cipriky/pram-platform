@@ -48,9 +48,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   // Aparatul principal folosit
   const aparat = v.aparate[0]?.aparat
-  const aparatText = aparat
-    ? `${aparat.producator} ${aparat.model}, nr. serie: ${aparat.serieNumar}`
+  const aparatLinie1 = aparat
+    ? `${aparat.producator} TIP ${aparat.model}: SERIA - ${aparat.serieNumar}`
     : '_______________'
+  const aparatLinie2 = aparat?.certificatEtalonare
+    ? `Certificat de etalonare nr. ${aparat.certificatEtalonare}`
+    : null
 
   // Măsurători buletin (toate tipurile din secțiunea Măsurători - Buletin)
   const masuratoriPrizePamant = v.masuratori.filter(m =>
@@ -223,11 +226,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   </div>` : ''}
   <div class="field-row">
     <span class="field-label">Metoda folosită la măsurare:</span>
-    <span class="field-value">Măsurare cu telurmetrul / megaohmmetrul conform SR EN 62305 și normativul I7</span>
+    <span class="field-value">compensatie in C.A. cu curenti slabi</span>
   </div>
-  <div class="field-row">
+  <div class="field-row" style="align-items:flex-start;">
     <span class="field-label">Fabricant, tipul și nr. aparatului:</span>
-    <span class="field-value">${aparatText}</span>
+    <span class="field-value">
+      <span style="display:block;">${aparatLinie1}</span>
+      ${aparatLinie2 ? `<span style="display:block;margin-top:2px;">${aparatLinie2}</span>` : ''}
+    </span>
   </div>
 </div>
 
