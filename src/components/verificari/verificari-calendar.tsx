@@ -10,7 +10,7 @@ type Verificare = {
   dataProgramata: string | Date | null
   status: string
   locatie: { denumire: string; client: { denumire: string } }
-  tehnician: { prenume: string; nume: string } | null
+  tehnician: { id: string; prenume: string; nume: string } | null
 }
 
 const STATUS_COLOR: Record<string, string> = {
@@ -52,7 +52,7 @@ export function VerificariCalendar({ verificari, tehnicieni }: {
   // Filtrează verificările
   const verificariFiltrate = useMemo(() => verificari.filter(v => {
     if (filtruStatus !== 'toate' && v.status !== filtruStatus) return false
-    if (filtruTehnician !== 'toti' && v.tehnician?.['id'] !== filtruTehnician) return false
+    if (filtruTehnician !== 'toti' && v.tehnician?.id !== filtruTehnician) return false
     return true
   }), [verificari, filtruStatus, filtruTehnician])
 
