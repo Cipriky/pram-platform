@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState } from 'react'
-import { CheckCircle2, AlertTriangle, XCircle, Droplets } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -28,18 +28,12 @@ interface FinalizeazaFormProps {
   masuratoriFailed: number
 }
 
-const UMIDITATE_OPTIONS = [
-  { value: 'uscat', label: 'Uscat', desc: 'Sol uscat, rezistivitate ridicată' },
-  { value: 'umed', label: 'Umed', desc: 'Sol umed, condiții normale' },
-  { value: 'foarte_uscat', label: 'Foarte uscat', desc: 'Sol extrem de uscat' },
-]
 
 export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFailed }: FinalizeazaFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [semnaturaTehnician, setSemnaturaTehnician] = useState<string | null>(null)
   const [semnaturaClient, setSemnaturaClient] = useState<string | null>(null)
-  const [umiditateaSolului, setUmiditateaSolului] = useState<string>('uscat')
 
   const suggestedRezultat = masuratoriFailed === 0 && masuratoriCount > 0 ? 'ADMIS' :
     masuratoriFailed > 0 && masuratoriFailed < masuratoriCount ? 'ADMIS_CU_REZERVE' :
@@ -51,16 +45,12 @@ export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFaile
   })
 
   const onSubmit = async (data: FinalizeazaValues) => {
-    // Prepend umiditate la observatiiTeren pentru a fi disponibil la generarea buletinului
-    const observatiiCuUmiditate = `[Umiditate: ${umiditateaSolului}]${data.observatiiTeren ? '\n' + data.observatiiTeren : ''}`
-
     const res = await fetch(`/api/verificari/${verificareId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         status: 'FINALIZATA',
         ...data,
-        observatiiTeren: observatiiCuUmiditate,
         semnaturaTehnician,
         semnaturaClient,
       }),
@@ -142,36 +132,6 @@ export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFaile
         </CardContent>
       </Card>
 
-      {/* Umiditate sol — pentru buletin PRAM */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Droplets className="h-4 w-4 text-blue-500" />
-            Gradul de umiditate a solului
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-xs text-gray-500 mb-3">Aprecierea stării solului la momentul măsurătorii — apare pe buletinul PRAM</p>
-          <div className="grid grid-cols-3 gap-3">
-            {UMIDITATE_OPTIONS.map(opt => (
-              <label
-                key={opt.value}
-                className={`cursor-pointer rounded-xl border-2 p-3 text-center transition-all ${umiditateaSolului === opt.value ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
-              >
-                <input
-                  type="radio"
-                  className="sr-only"
-                  value={opt.value}
-                  checked={umiditateaSolului === opt.value}
-                  onChange={() => setUmiditateaSolului(opt.value)}
-                />
-                <p className={`font-semibold text-sm ${umiditateaSolului === opt.value ? 'text-blue-700' : 'text-gray-700'}`}>{opt.label}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
-              </label>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Raport tehnic */}
       <Card>
