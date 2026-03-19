@@ -146,24 +146,24 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<title>${FIRMA_NUME}</title>
+<title></title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family: Arial, Helvetica, sans-serif; font-size:11px; color:#111; background:#fff; padding:20px 28px; max-width:780px; margin:0 auto; }
   @media print {
     body { padding:0; max-width:none; }
     .no-print { display:none !important; }
-    @page { margin:1.2cm 1.5cm; size:A4 portrait; }
+    @page { margin:1.2cm 1.5cm; size:A4 portrait; margin-top:0.5cm; }
   }
 
   /* Header firmă */
   .antet { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px double #1e3a5f; padding-bottom:8px; margin-bottom:14px; }
   .antet-stanga { display:flex; flex-direction:column; align-items:flex-start; }
-  .antet-stanga .firma { font-size:14px; font-weight:900; color:#1e3a5f; letter-spacing:0.5px; margin-top:6px; }
-  .antet-stanga .anre-text { font-size:9.5px; color:#555; margin-top:2px; }
+  .antet-stanga .firma { font-size:13px; font-weight:900; color:#1e3a5f; letter-spacing:0.5px; margin-top:6px; }
+  .antet-stanga .anre-text { font-size:11px; color:#555; margin-top:2px; }
   .antet-dreapta { display:flex; flex-direction:column; align-items:flex-end; }
-  .antet-dreapta .titlu-doc { font-size:18px; font-weight:900; color:#1e3a5f; text-transform:uppercase; letter-spacing:1.5px; margin-top:8px; }
-  .antet-dreapta .nr-doc { font-size:12px; font-weight:700; color:#444; margin-top:2px; }
+  .antet-dreapta .titlu-doc { font-size:13px; font-weight:900; color:#1e3a5f; text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+  .antet-dreapta .nr-doc { font-size:11px; font-weight:700; color:#444; margin-top:2px; }
 
   /* Câmpuri date */
   .section { margin-bottom:10px; }
