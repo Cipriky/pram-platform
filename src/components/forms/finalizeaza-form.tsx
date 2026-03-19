@@ -16,7 +16,7 @@ import { SignatureCanvas } from '@/components/shared/signature-canvas'
 const finalizeazaSchema = z.object({
   rezultat: z.enum(['ADMIS', 'RESPINS', 'ADMIS_CU_REZERVE']),
   observatiiTeren: z.string().optional(),
-  concluzii: z.string().min(10, 'Concluziile sunt obligatorii (min. 10 caractere)'),
+  concluzii: z.string().optional(),
   recomandari: z.string().optional(),
 })
 
@@ -197,7 +197,6 @@ export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFaile
               placeholder="ex: Instalația electrică ADMISĂ. Priza de pământ corespunde normelor în vigoare."
               rows={4}
             />
-            {errors.concluzii && <p className="text-xs text-red-500">{errors.concluzii.message}</p>}
           </div>
 
           <div className="space-y-1.5">
