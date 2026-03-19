@@ -192,13 +192,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   .valori-admise td:last-child { font-weight:900; color:#1e3a5f; text-align:right; }
 
   /* Rezultat */
-  .rezultat-box { display:inline-block; padding:5px 14px; border-radius:4px; font-size:13px; font-weight:900; color:#fff; background:${rezultatColor}; letter-spacing:0.5px; }
+  .rezultat-box { display:inline-block; padding:5px 14px; border-radius:4px; font-size:13px; font-weight:900; color:#fff !important; background:${rezultatColor} !important; letter-spacing:0.5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
   /* Semnături */
-  .sig-grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:20px; }
-  .sig-box { text-align:center; }
+  .sig-grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:20px; align-items:end; }
+  .sig-box { text-align:center; display:flex; flex-direction:column; }
   .sig-box .sig-label { font-size:9.5px; color:#555; margin-bottom:6px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; }
-  .sig-box .sig-linie { border-bottom:1px solid #333; min-height:60px; margin-bottom:4px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; }
+  .sig-box .sig-linie { border-bottom:1px solid #333; height:70px; margin-bottom:4px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; flex-shrink:0; }
   .sig-box .sig-name { font-size:10px; font-weight:600; }
 
   /* Nota continuitate */
