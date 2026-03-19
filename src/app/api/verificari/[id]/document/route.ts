@@ -152,12 +152,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 
   /* Header firmă */
-  .antet { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px double #1e3a5f; padding-bottom:10px; margin-bottom:14px; }
-  .antet-stanga .firma { font-size:15px; font-weight:900; color:#1e3a5f; letter-spacing:0.5px; }
-  .antet-stanga .anre { font-size:10px; color:#555; margin-top:3px; }
+  .antet { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px double #1e3a5f; padding-bottom:8px; margin-bottom:14px; }
+  .antet-stanga { display:flex; flex-direction:column; align-items:flex-start; }
+  .antet-stanga img { margin-bottom:8px; }
+  .antet-stanga .firma { font-size:14px; font-weight:900; color:#1e3a5f; letter-spacing:0.5px; }
+  .antet-stanga .anre { font-size:9.5px; color:#555; margin-top:2px; }
   .antet-dreapta { text-align:right; }
-  .antet-dreapta .titlu-doc { font-size:17px; font-weight:900; color:#1e3a5f; text-transform:uppercase; letter-spacing:1px; }
-  .antet-dreapta .nr-doc { font-size:13px; font-weight:700; color:#333; margin-top:3px; }
+  .antet-dreapta .titlu-doc { font-size:18px; font-weight:900; color:#1e3a5f; text-transform:uppercase; letter-spacing:1.5px; }
+  .antet-dreapta .nr-doc { font-size:12px; font-weight:700; color:#444; margin-top:2px; }
 
   /* Câmpuri date */
   .section { margin-bottom:10px; }
@@ -376,6 +378,7 @@ ${masuratoriAltele.length > 0 ? `
 <!-- ANTET ANEXĂ -->
 <div class="antet">
   <div class="antet-stanga">
+    ${logoSrc ? `<img src="${logoSrc}" alt="Logo" style="height:70px;width:auto;display:block;margin-bottom:8px;" />` : ''}
     <div class="firma">${FIRMA_NUME}</div>
     <div class="anre">Atestat ANRE ${FIRMA_ANRE}</div>
   </div>
