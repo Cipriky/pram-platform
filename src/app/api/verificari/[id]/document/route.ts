@@ -11,12 +11,16 @@ const FIRMA_ANRE = 'NR. 12299/2017'
 
 function getLogoBase64(): string {
   try {
-    const logoPath = join(process.cwd(), 'public', 'logo.png')
-    const data = readFileSync(logoPath)
+    const data = readFileSync(join(process.cwd(), 'public', 'logo.png'))
     return 'data:image/png;base64,' + data.toString('base64')
-  } catch {
-    return ''
-  }
+  } catch { return '' }
+}
+
+function getAnreLogoBase64(): string {
+  try {
+    const data = readFileSync(join(process.cwd(), 'public', 'anre-sigla-1-300x265.jpg'))
+    return 'data:image/jpeg;base64,' + data.toString('base64')
+  } catch { return '' }
 }
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -136,12 +140,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     : '<div style="height:55px;"></div>'
 
   const logoSrc = getLogoBase64()
+  const anreLogoSrc = getAnreLogoBase64()
 
   const html = `<!DOCTYPE html>
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<title>Buletin PRAM ${v.numar}</title>
+<title>${FIRMA_NUME}</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family: Arial, Helvetica, sans-serif; font-size:11px; color:#111; background:#fff; padding:20px 28px; max-width:780px; margin:0 auto; }
@@ -154,11 +159,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   /* Header firmă */
   .antet { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px double #1e3a5f; padding-bottom:8px; margin-bottom:14px; }
   .antet-stanga { display:flex; flex-direction:column; align-items:flex-start; }
-  .antet-stanga img { margin-bottom:8px; }
-  .antet-stanga .firma { font-size:14px; font-weight:900; color:#1e3a5f; letter-spacing:0.5px; }
-  .antet-stanga .anre { font-size:9.5px; color:#555; margin-top:2px; }
-  .antet-dreapta { text-align:right; }
-  .antet-dreapta .titlu-doc { font-size:18px; font-weight:900; color:#1e3a5f; text-transform:uppercase; letter-spacing:1.5px; }
+  .antet-stanga .firma { font-size:14px; font-weight:900; color:#1e3a5f; letter-spacing:0.5px; margin-top:6px; }
+  .antet-stanga .anre-text { font-size:9.5px; color:#555; margin-top:2px; }
+  .antet-dreapta { display:flex; flex-direction:column; align-items:flex-end; }
+  .antet-dreapta .titlu-doc { font-size:18px; font-weight:900; color:#1e3a5f; text-transform:uppercase; letter-spacing:1.5px; margin-top:8px; }
   .antet-dreapta .nr-doc { font-size:12px; font-weight:700; color:#444; margin-top:2px; }
 
   /* Câmpuri date */
@@ -213,11 +217,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 <!-- ANTET FIRMĂ -->
 <div class="antet">
   <div class="antet-stanga">
-    ${logoSrc ? `<img src="${logoSrc}" alt="Logo" style="height:70px;width:auto;display:block;margin-bottom:6px;" />` : ''}
+    ${logoSrc ? `<img src="${logoSrc}" alt="Logo TATA" style="height:65px;width:auto;display:block;" />` : ''}
     <div class="firma">${FIRMA_NUME}</div>
-    <div class="anre">Atestat ANRE ${FIRMA_ANRE}</div>
+    <div class="anre-text">Atestat ANRE ${FIRMA_ANRE}</div>
   </div>
   <div class="antet-dreapta">
+    ${anreLogoSrc ? `<img src="${anreLogoSrc}" alt="Logo ANRE" style="height:55px;width:auto;display:block;margin-left:auto;" />` : ''}
     <div class="titlu-doc">Buletin de verificare</div>
     <div class="nr-doc">nr. ${v.numar}</div>
   </div>
@@ -378,11 +383,12 @@ ${masuratoriAltele.length > 0 ? `
 <!-- ANTET ANEXĂ -->
 <div class="antet">
   <div class="antet-stanga">
-    ${logoSrc ? `<img src="${logoSrc}" alt="Logo" style="height:70px;width:auto;display:block;margin-bottom:8px;" />` : ''}
+    ${logoSrc ? `<img src="${logoSrc}" alt="Logo TATA" style="height:65px;width:auto;display:block;" />` : ''}
     <div class="firma">${FIRMA_NUME}</div>
-    <div class="anre">Atestat ANRE ${FIRMA_ANRE}</div>
+    <div class="anre-text">Atestat ANRE ${FIRMA_ANRE}</div>
   </div>
   <div class="antet-dreapta">
+    ${anreLogoSrc ? `<img src="${anreLogoSrc}" alt="Logo ANRE" style="height:55px;width:auto;display:block;margin-left:auto;" />` : ''}
     <div class="titlu-doc">Anexa buletin de verificare</div>
     <div class="nr-doc">TIP B1 · nr. ${v.numar}</div>
   </div>
