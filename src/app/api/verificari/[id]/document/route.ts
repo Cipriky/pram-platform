@@ -3,9 +3,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth'
 import prisma from '@/lib/db'
 import { addMonths } from 'date-fns'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 const FIRMA_NUME = 'T.A.T.A. CONSULT EX S.R.L.'
 const FIRMA_ANRE = 'NR. 12299/2017'
+
+function getLogoBase64(): string {
+  try {
+    const logoPath = join(process.cwd(), 'public', 'logo.png')
+    const data = readFileSync(logoPath)
+    return 'data:image/png;base64,' + data.toString('base64')
+  } catch {
+    return ''
+  }
+}
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession()
@@ -123,6 +135,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     ? `<img src="${v.semnaturaClient}" style="max-height:70px;display:block;margin:0 auto;" />`
     : '<div style="height:55px;"></div>'
 
+  const logoSrc = getLogoBase64()
+
   const html = `<!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -197,7 +211,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 <!-- ANTET FIRMĂ -->
 <div class="antet">
   <div class="antet-stanga">
-    <img src="${process.env.NEXT_PUBLIC_APP_URL}/logo.png" alt="Logo" style="height:70px;width:auto;display:block;margin-bottom:6px;" />
+    ${logoSrc ? `<img src="${logoSrc}" alt="Logo" style="height:70px;width:auto;display:block;margin-bottom:6px;" />` : ''}
     <div class="firma">${FIRMA_NUME}</div>
     <div class="anre">Atestat ANRE ${FIRMA_ANRE}</div>
   </div>
