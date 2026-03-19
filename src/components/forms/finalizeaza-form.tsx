@@ -26,10 +26,15 @@ interface FinalizeazaFormProps {
   verificareId: string
   masuratoriCount: number
   masuratoriFailed: number
+  observatiiTerenSalvate?: string
 }
 
+function extractUmiditatePrefix(obs: string): string {
+  const m = obs.match(/^(\[Umiditate: [^\]]+\]\n?)/)
+  return m ? m[1] : ''
+}
 
-export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFailed }: FinalizeazaFormProps) {
+export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFailed, observatiiTerenSalvate = '' }: FinalizeazaFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [semnaturaTehnician, setSemnaturaTehnician] = useState<string | null>(null)
@@ -45,12 +50,17 @@ export function FinalizeazaForm({ verificareId, masuratoriCount, masuratoriFaile
   })
 
   const onSubmit = async (data: FinalizeazaValues) => {
+    // Păstrează prefixul [Umiditate: X] salvat anterior
+    const umiditatePrefix = extractUmiditatePrefix(observatiiTerenSalvate)
+    const observatiiFinale = umiditatePrefix + (data.observatiiTeren ?? '')
+
     const res = await fetch(`/api/verificari/${verificareId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         status: 'FINALIZATA',
         ...data,
+        observatiiTeren: observatiiFinale,
         semnaturaTehnician,
         semnaturaClient,
       }),

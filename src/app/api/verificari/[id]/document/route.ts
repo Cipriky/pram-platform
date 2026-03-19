@@ -197,6 +197,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 <!-- ANTET FIRMĂ -->
 <div class="antet">
   <div class="antet-stanga">
+    <img src="${process.env.NEXT_PUBLIC_APP_URL}/logo.png" alt="Logo" style="height:70px;width:auto;display:block;margin-bottom:6px;" />
     <div class="firma">${FIRMA_NUME}</div>
     <div class="anre">Atestat ANRE ${FIRMA_ANRE}</div>
   </div>

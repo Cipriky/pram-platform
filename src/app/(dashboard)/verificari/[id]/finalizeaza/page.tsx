@@ -52,6 +52,7 @@ export default async function FinalizeazaPage({ params }: { params: { id: string
           verificareId={params.id}
           masuratoriCount={verificare.masuratori.length}
           masuratoriFailed={verificare.masuratori.filter(m => m.conformitate === false).length}
+          observatiiTerenSalvate={verificare.observatiiTeren ?? ''}
         />
       </div>
     </div>
