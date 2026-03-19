@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState, useRef, useEffect } from 'react'
 import { verificareSchema, VerificareFormValues } from '@/lib/validations/verificare'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
+import { ChevronDown, X } from 'lucide-react'
 
 interface VerificareFormProps {
   locatii: Array<{
@@ -31,6 +33,29 @@ interface VerificareFormProps {
 export function VerificareForm({ locatii, tehnicieni, defaultValues, verificareId }: VerificareFormProps) {
   const router = useRouter()
   const { toast } = useToast()
+
+  const defaultLoc = defaultValues?.locatieId ? locatii.find(l => l.id === defaultValues.locatieId) : null
+  const [locSearch, setLocSearch] = useState(defaultLoc ? `${defaultLoc.denumire} — ${defaultLoc.client.denumire}` : '')
+  const [locOpen, setLocOpen] = useState(false)
+  const [locSelected, setLocSelected] = useState<string>(defaultValues?.locatieId ?? '')
+  const locRef = useRef<HTMLDivElement>(null)
+
+  const locatiiFiltrate = locatii.filter(loc => {
+    const q = locSearch.toLowerCase()
+    return (
+      loc.denumire.toLowerCase().includes(q) ||
+      loc.client.denumire.toLowerCase().includes(q) ||
+      loc.oras.toLowerCase().includes(q)
+    )
+  })
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (locRef.current && !locRef.current.contains(e.target as Node)) setLocOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<VerificareFormValues>({
     resolver: zodResolver(verificareSchema),
@@ -91,23 +116,51 @@ export function VerificareForm({ locatii, tehnicieni, defaultValues, verificareI
             </Select>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5" ref={locRef}>
             <Label>Locație *</Label>
-            <Select
-              defaultValue={defaultValues?.locatieId ?? ''}
-              onValueChange={val => setValue('locatieId', val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selectează locația..." />
-              </SelectTrigger>
-              <SelectContent>
-                {locatii.map(loc => (
-                  <SelectItem key={loc.id} value={loc.id}>
-                    {loc.denumire} — {loc.client.denumire} ({loc.oras})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <div className="relative">
+                <Input
+                  value={locSearch}
+                  onChange={e => { setLocSearch(e.target.value); setLocOpen(true) }}
+                  onFocus={() => setLocOpen(true)}
+                  placeholder="Caută după locație, client sau oraș..."
+                  className="pr-8"
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onClick={() => { setLocSearch(''); setLocSelected(''); setValue('locatieId', ''); setLocOpen(true) }}
+                >
+                  {locSelected ? <X className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+              </div>
+              {locOpen && locatiiFiltrate.length > 0 && (
+                <div className="absolute z-50 mt-1 w-full rounded-md border bg-white shadow-lg max-h-60 overflow-auto">
+                  {locatiiFiltrate.map(loc => (
+                    <button
+                      key={loc.id}
+                      type="button"
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 ${locSelected === loc.id ? 'bg-blue-50 font-medium' : ''}`}
+                      onClick={() => {
+                        setLocSelected(loc.id)
+                        setValue('locatieId', loc.id)
+                        setLocSearch(`${loc.denumire} — ${loc.client.denumire} (${loc.oras})`)
+                        setLocOpen(false)
+                      }}
+                    >
+                      <span className="font-medium">{loc.denumire}</span>
+                      <span className="text-gray-500"> — {loc.client.denumire} · {loc.oras}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {locOpen && locatiiFiltrate.length === 0 && locSearch && (
+                <div className="absolute z-50 mt-1 w-full rounded-md border bg-white shadow-lg px-3 py-2 text-sm text-gray-500">
+                  Nicio locație găsită
+                </div>
+              )}
+            </div>
             {errors.locatieId && <p className="text-xs text-red-500">{errors.locatieId.message}</p>}
           </div>
 
