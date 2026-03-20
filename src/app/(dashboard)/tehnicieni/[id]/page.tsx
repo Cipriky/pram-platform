@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { StatusVerificareBadge, RezultatVerificareBadge } from '@/components/shared/status-badge'
 import { formatDate, formatDateTime, TIP_VERIFICARE_LABELS, ROLE_LABELS } from '@/lib/utils'
+import { ToggleStatusBtn } from '@/components/tehnicieni/toggle-status-btn'
 
 export const metadata: Metadata = { title: 'Profil tehnician' }
 
@@ -88,6 +89,11 @@ export default async function TehnicianProfilPage({ params }: { params: { id: st
                   <span>Înregistrat {formatDate(user.createdAt)}</span>
                 </div>
               </div>
+              {session?.user?.role === 'ADMIN' && session.user.id !== user.id && (
+                <div className="border-t px-4 py-3">
+                  <ToggleStatusBtn userId={user.id} currentStatus={user.status} />
+                </div>
+              )}
             </Card>
 
             {/* Statistici */}
