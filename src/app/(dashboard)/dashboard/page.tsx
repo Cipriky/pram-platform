@@ -59,8 +59,15 @@ async function getDashboardData(userId: string, role: string) {
     }),
     prisma.aparatMasura.count({
       where: {
-        status: 'ACTIV',
-        dataUrmatoareEtalonare: { lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) },
+        OR: [
+          { status: 'INACTIV' },
+          {
+            status: 'ACTIV',
+            dataUrmatoareEtalonare: {
+              lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+            },
+          },
+        ],
       },
     }),
     prisma.verificare.findMany({
@@ -162,7 +169,7 @@ export default async function DashboardPage() {
               value={data.aparateNecesitaEtalonare}
               icon={Wrench}
               color="red"
-              description="etalonare în 30 zile"
+              description="inactive sau expiră în 30 zile"
             />
           )}
         </div>
