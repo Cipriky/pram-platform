@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { List, Calendar } from 'lucide-react'
+import { List, Calendar, ArrowUpDown } from 'lucide-react'
 import { StatusVerificareBadge, RezultatVerificareBadge } from '@/components/shared/status-badge'
 import { formatDate, TIP_VERIFICARE_LABELS } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -26,11 +26,60 @@ export function VerificariViewToggle({ verificari, tehnicieni, canCreate }: {
   canCreate: boolean
 }) {
   const [view, setView] = useState<'lista' | 'calendar'>('lista')
+  const [filtruStatus, setFiltruStatus] = useState<string>('toate')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+  const statusOptions = [
+    { value: 'toate', label: 'Toate' },
+    { value: 'PROGRAMATA', label: 'Programate' },
+    { value: 'IN_DESFASURARE', label: 'În desfășurare' },
+    { value: 'FINALIZATA', label: 'Finalizate' },
+    { value: 'AMANATA', label: 'Amânate' },
+    { value: 'ANULATA', label: 'Anulate' },
+  ]
+
+  const verificariFiltrate = useMemo(() => {
+    let list = [...verificari]
+    if (filtruStatus !== 'toate') list = list.filter(v => v.status === filtruStatus)
+    list.sort((a, b) => {
+      const da = a.dataProgramata ? new Date(a.dataProgramata).getTime() : 0
+      const db = b.dataProgramata ? new Date(b.dataProgramata).getTime() : 0
+      return sortDir === 'asc' ? da - db : db - da
+    })
+    return list
+  }, [verificari, filtruStatus, sortDir])
 
   return (
     <div className="space-y-4">
-      {/* Toggle butoane */}
-      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+      {/* Filtre + Toggle */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Status filter */}
+        <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+          {statusOptions.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setFiltruStatus(opt.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                filtruStatus === opt.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Sort dată */}
+        <button
+          onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-all"
+        >
+          <ArrowUpDown className="h-3.5 w-3.5" />
+          Dată {sortDir === 'asc' ? '↑ crescător' : '↓ descrescător'}
+        </button>
+
+        {/* View toggle */}
+        <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 ml-auto">
+
         <button
           onClick={() => setView('lista')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -53,16 +102,17 @@ export function VerificariViewToggle({ verificari, tehnicieni, canCreate }: {
           <Calendar className="h-4 w-4" />
           Calendar
         </button>
+        </div>
       </div>
 
       {/* Vizualizare Listă */}
       {view === 'lista' && (
         <Card>
           <CardContent className="p-0">
-            {verificari.length === 0 ? (
+            {verificariFiltrate.length === 0 ? (
               <div className="flex flex-col items-center py-12 text-gray-400">
-                <p className="text-sm">Nu există verificări.</p>
-                {canCreate && (
+                <p className="text-sm">Nu există verificări{filtruStatus !== 'toate' ? ' cu statusul selectat' : ''}.</p>
+                {canCreate && filtruStatus === 'toate' && (
                   <Link href="/verificari/nou" className="mt-2 text-sm text-blue-600 hover:underline">
                     Programează prima verificare →
                   </Link>
@@ -70,7 +120,7 @@ export function VerificariViewToggle({ verificari, tehnicieni, canCreate }: {
               </div>
             ) : (
               <div className="divide-y">
-                {verificari.map(v => (
+                {verificariFiltrate.map(v => (
                   <Link
                     key={v.id}
                     href={`/verificari/${v.id}`}

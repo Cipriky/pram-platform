@@ -55,6 +55,6 @@ export async function GET(req: NextRequest) {
     verificariLuna,
     programate,
     inDesfasurare,
-    aparateAlerta,
+    aparateNecesitaEtalonare: aparateAlerta,
   })
 }
